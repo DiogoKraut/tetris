@@ -5,15 +5,16 @@
 
 #include <ncurses.h>
 
-#define MAX_SHAPE 16
+#define MAX_SHAPE 4  // Toda peca original tem 4 blocos
+#define NUM_PIECES 7 // Numero de pecas diferentes (excluindo rotacoes)
 
-typedef sPoint {
+typedef struct sPoint {
 	int i,j;
 } tPoint;
 
 typedef struct sPiece {
-	tPoint point[MAX_SHAPE];
+	tPoint pos[MAX_SHAPE];
+} tPiece;
 
-}
-
+bool rotate(tPiece *p);
 #endif
