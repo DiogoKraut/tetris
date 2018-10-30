@@ -4,7 +4,8 @@
 #include <string.h>
 #include <ncurses.h>
 #include <unistd.h>
-#include <time.h>
+#include <sys/time.h>
+#include <signal.h>
 #include "pieces.h"
 #include "screen.h"
 
@@ -19,7 +20,7 @@ const tPiece pieces[NUM_PIECES] = { // A coordenada do centro aparece por primei
 	},
 	{ // J
 		1, 0, 2, 0,
-		0, 0, 0, 1,		
+		0, 0, 0, 1,
 	},
 	{ // O
 		0, 1, 1, 0,
@@ -42,6 +43,7 @@ const tPiece pieces[NUM_PIECES] = { // A coordenada do centro aparece por primei
 int main(int argc, char const *argv[]) {
 	srand(time(NULL)); // Seed
 	int x, y, i, j;
+
 	/* Inicializacao NCurses */
 	initscr();             // inicializa a biblioteca ncurses
 	//raw();                 // ler teclas de controle (^C, ^Z, etc)
@@ -51,6 +53,10 @@ int main(int argc, char const *argv[]) {
 	curs_set(0);           // esconde o cursor do terminal
 	start_color();         // ativa modulo de cores
 
+	/* Inicializacao dos sinais */
+	signal_setup();
+	/* Inicilizacao do timer */
+	timer_setup();
 	/* Check window size */
 	getmaxyx(stdscr, y, x);
 	if(y < MIN_HEIGHT || x < MIN_LENGTH) {
