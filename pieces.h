@@ -12,4 +12,7 @@
 typedef int tPiece[DIMENTION][MAX_SHAPE];
 
 bool rotate(tPiece *p);
+bool checkCollision(void);
+void movePieceDown(void);
+
 #endif

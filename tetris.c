@@ -5,9 +5,12 @@
 #include <ncurses.h>
 #include <unistd.h>
 #include <sys/time.h>
+#include <time.h>
 #include <signal.h>
 #include "pieces.h"
 #include "screen.h"
+#include "setup.h"
+
 
 const tPiece pieces[NUM_PIECES] = { // A coordenada do centro aparece por primeiro
 	{ // I
@@ -40,9 +43,11 @@ const tPiece pieces[NUM_PIECES] = { // A coordenada do centro aparece por primei
 	},
 };
 
+tPiece old_piece, new_piece; // Globais pois precisam ser acessadas em signal_handler
+
 int main(int argc, char const *argv[]) {
 	srand(time(NULL)); // Seed
-	int x, y, i, j;
+	int x, y;
 
 	/* Inicializacao NCurses */
 	initscr();             // inicializa a biblioteca ncurses
@@ -74,39 +79,20 @@ int main(int argc, char const *argv[]) {
 	init_pair(4, COLOR_MAGENTA, COLOR_BLACK); // Cor das paredes da arena
 
 	WINDOW *arena = newwin(20, 15, 0, 1);
-	tPiece old_piece, new_piece;
+	
 
 	printArena(15, 20);
 	refresh();
 	int c;
+
+	memcpy(old_piece, pieces[rand() % NUM_PIECES], sizeof(tPiece));
+	memcpy(new_piece, pieces[rand() % NUM_PIECES], sizeof(tPiece));
 	while(true) {
-			wclear(arena);
-		memcpy(old_piece, pieces[rand() % NUM_PIECES], sizeof(tPiece));
+		c = getch();
 
-		while(c = getch()) {
-			switch(c) {
-				case KEY_LEFT:
-					for(j = 0; j < MAX_SHAPE; j++)
-						old_piece[1][j]--;
-					break;
+		handleInput(c);
 
-				case KEY_RIGHT:
-					for(j = 0; j < MAX_SHAPE; j++)
-						old_piece[1][j]++;
-					break;
-
-				default:
-					for(j= 0; j < MAX_SHAPE; j++)
-					old_piece[0][j]++;
-			}
-
-
-			wclear(arena);
-			for(j = 0; j < MAX_SHAPE; j++)
-				mvwaddch(arena, old_piece[0][j], old_piece[1][j], ACS_CKBOARD);
-			wrefresh(arena);
-			sleep(1);
-		}
+		printPiece(old_piece, arena);
 	}
 	delwin(arena);
 	endwin();

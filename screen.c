@@ -25,3 +25,15 @@ void printArena(int x, int y) {
 
 	attroff(COLOR_PAIR(4));
 }
+
+void printPiece(tPiece p, WINDOW *win) {
+		int j, color;
+		wclear(win);
+
+		color = (rand() % 3) + 1;
+		wattron(win, COLOR_PAIR(color));
+		for(j = 0; j < MAX_SHAPE; j++)
+			mvwaddch(win, p[0][j], p[1][j], ACS_CKBOARD);
+		wrefresh(win);
+		wattroff(win, COLOR_PAIR(color));
+}

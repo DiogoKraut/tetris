@@ -2,9 +2,11 @@
 
 #include <stdlib.h>
 #include <string.h>
-
+#include <ncurses.h>
+#include "pieces.h"
 
 #define MIN_HEIGHT 21
 #define MIN_LENGTH 35
 
 void printArena(int x, int y);
+void printPiece(tPiece p, WINDOW *win);
