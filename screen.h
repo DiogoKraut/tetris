@@ -8,5 +8,9 @@
 #define MIN_HEIGHT 21
 #define MIN_LENGTH 35
 
-void printArena(int x, int y);
+#define arena_length 15
+#define arena_height 20
+
+void printArena(int x, int y, WINDOW *win);
 void printPiece(tPiece p, WINDOW *win);
+void printFixedPieces(void);

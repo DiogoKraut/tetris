@@ -11,7 +11,7 @@
 #include "screen.h"
 #include "setup.h"
 
-
+char fixed_pieces[arena_height][arena_length];
 const tPiece pieces[NUM_PIECES] = { // A coordenada do centro aparece por primeiro
 	{ // I
 		0, 0, 0, 0,
@@ -43,7 +43,9 @@ const tPiece pieces[NUM_PIECES] = { // A coordenada do centro aparece por primei
 	},
 };
 
-tPiece old_piece, new_piece; // Globais pois precisam ser acessadas em signal_handler
+tPiece old_piece, new_piece; // Variaveis para pecas (atual e preview)
+WINDOW *arena;               // Tela onde as pecas serao impressas
+int piece_color;             // Cor da peca atual
 
 int main(int argc, char const *argv[]) {
 	srand(time(NULL)); // Seed
@@ -58,10 +60,6 @@ int main(int argc, char const *argv[]) {
 	curs_set(0);           // esconde o cursor do terminal
 	start_color();         // ativa modulo de cores
 
-	/* Inicializacao dos sinais */
-	signal_setup();
-	/* Inicilizacao do timer */
-	timer_setup();
 	/* Check window size */
 	getmaxyx(stdscr, y, x);
 	if(y < MIN_HEIGHT || x < MIN_LENGTH) {
@@ -69,31 +67,28 @@ int main(int argc, char const *argv[]) {
 		abort();
 	}
 
-	/* Inicia pares de cores */
-	init_pair(0, COLOR_RED, COLOR_BLACK);     // Cores das pecas ja fixas
+	init_color_pairs();
+	init_fixed_pieces();
+	/* Inicializacao dos sinais */
+	signal_setup();
+	/* Inicilizacao do timer */
+	timer_setup();
 
-	init_pair(1, COLOR_YELLOW, COLOR_BLACK);  /*    Possiveis cores      */
-	init_pair(2, COLOR_GREEN, COLOR_BLACK);	  /*       das pecas         */
-	init_pair(3, COLOR_BLUE, COLOR_BLACK);    /*       em queda          */
+	// New window offset by 1 column
+	arena = newwin(arena_height, arena_length, 0, 1);
 
-	init_pair(4, COLOR_MAGENTA, COLOR_BLACK); // Cor das paredes da arena
-
-	WINDOW *arena = newwin(20, 15, 0, 1);
-	
-
-	printArena(15, 20);
+	printArena(15, 20, stdscr);
 	refresh();
 	int c;
 
 	memcpy(old_piece, pieces[rand() % NUM_PIECES], sizeof(tPiece));
 	memcpy(new_piece, pieces[rand() % NUM_PIECES], sizeof(tPiece));
+
 	while(true) {
 		c = getch();
-
 		handleInput(c);
-
-		printPiece(old_piece, arena);
 	}
+
 	delwin(arena);
 	endwin();
 	return 0;
