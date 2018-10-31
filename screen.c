@@ -9,6 +9,7 @@ extern char fixed_pieces[arena_height][arena_length];
 extern tPiece old_piece, new_piece;
 extern WINDOW *arena;
 extern int piece_color;
+extern int offi, offj;
 
 void printArena(int x, int y, WINDOW *win) {
 	int i;
@@ -32,11 +33,13 @@ void printArena(int x, int y, WINDOW *win) {
 }
 
 void printPiece(tPiece p, WINDOW *win) {
-		int j;
+		int i, j;
 		wclear(win);
 
-		for(j = 0; j < MAX_SHAPE; j++)
-			mvwaddch(win, p[0][j], p[1][j], ACS_CKBOARD | COLOR_PAIR(piece_color));
+		for(i = 0; i < DIMENTION; i++)
+			for(j = 0; j < DIMENTION; j++)
+				if(old_piece[i][j] == 1)
+					mvwaddch(win, i + offi, j + offj, ACS_CKBOARD | COLOR_PAIR(piece_color));
 
 		printFixedPieces();
 		wrefresh(win);

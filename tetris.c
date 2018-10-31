@@ -12,7 +12,7 @@
 
 #include "pieces.h"
 #include "screen.h"
-#include "setup.h"
+#include "game.h"
 
 char fixed_pieces[arena_height][arena_length];
 const tPiece pieces[NUM_PIECES] = {
@@ -33,19 +33,19 @@ const tPiece pieces[NUM_PIECES] = {
 	 {0, 0, 0}}, // O
 
 	{{0, 1, 1},
-	 {0, 1, 0},
-	 {1, 1, 0}}, // S
+	 {1, 1, 0},
+	 {0, 0, 0}}, // S
 
 	{{1, 1, 1},
 	 {0, 1, 0},
 	 {0, 0, 0}}, // T
 
 	{{1, 1, 0},
-	 {0, 1, 0},
-	 {0, 1, 1}} // Z
+	 {0, 1, 1},
+	 {0, 0, 0}} // Z
 };
 
-int offi, offj;              // Offset da peca
+int offi, offj = arena_length/2;              // Offset da peca
 tPiece old_piece, new_piece; // Variaveis para pecas (atual e preview)
 WINDOW *arena;               // Tela onde as pecas serao impressas
 int piece_color;             // Cor da peca atual

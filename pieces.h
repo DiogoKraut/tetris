@@ -8,12 +8,12 @@
 #define DIMENTION 3
 #define NUM_PIECES 7 // Numero de pecas diferentes (excluindo rotacoes)
 
-typedef int tPiece[DIMENTION][DIMENTION]
+typedef int tPiece[DIMENTION][DIMENTION];
 
-bool rotate(tPiece *p);
-int checkBottomCollision(void);
+void rotate(int dir);
+int checkBottomCollision(tPiece p);
 void movePieceDown(void);
-void affixPiece(void);
+void affixPiece(tPiece p);
 void movePiece(int dir);
 
 #endif
