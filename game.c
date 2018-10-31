@@ -12,6 +12,7 @@ extern const tPiece pieces[NUM_PIECES];
 extern tPiece old_piece, new_piece;
 extern WINDOW *arena;
 extern int piece_color;
+extern int SCORE, score_multiplier;
 
 void timer_setup(void) {
 	/* Timer define a intensidade da "gravidade". Em intervalos fixos SIGALRM eh
@@ -53,6 +54,10 @@ void signal_handler(int signum) {
 			abort();
 
 		case SIGUSR1:
+			endwin();
+			printf("Game Over \n");
+			exit(1);
+			break;
 			
 	}
 }
@@ -81,6 +86,8 @@ void init_color_pairs(void) {
 	init_pair(4, COLOR_BLUE, COLOR_BLACK);    /*       em queda          */
 
 	init_pair(5, COLOR_MAGENTA, COLOR_BLACK); // Cor das paredes da arena
+
+	init_pair(6, COLOR_BLACK, COLOR_BLACK);
 }
 
 void init_fixed_pieces(void) {
@@ -111,5 +118,6 @@ void removeLine(int line) {
 	for(j = 0; j < arena_length; j++)
 		fixed_pieces[line][j] = '0';
 
+	score_multiplier += 100;
 	wrefresh(arena);
 }

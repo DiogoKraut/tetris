@@ -11,6 +11,7 @@ extern tPiece old_piece, new_piece;
 extern WINDOW *arena;
 extern int piece_color;
 extern int offi, offj;
+extern int SCORE, score_multiplier;
 
 int checkBottomCollision(tPiece p) {
 	int i, j;
@@ -86,6 +87,9 @@ void affixPiece(tPiece p) {
 	/* Verifica se uma linha foi completada */
 	for(i = 0; i < DIMENTION; i++)
 		checkLine(i + offi);
+
+	SCORE += score_multiplier;
+	score_multiplier = 0;
 }
 
 

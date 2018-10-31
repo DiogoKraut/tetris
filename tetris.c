@@ -45,6 +45,9 @@ const tPiece pieces[NUM_PIECES] = {
 	 {0, 0, 0}} // Z
 };
 
+int SCORE = 0;
+int score_multiplier = 0;
+
 int offi, offj = arena_length/2;              // Offset da peca
 tPiece old_piece, new_piece; // Variaveis para pecas (atual e preview)
 WINDOW *arena;               // Tela onde as pecas serao impressas
@@ -77,17 +80,25 @@ int main(int argc, char const *argv[]) {
 	/* Inicilizacao do timer */
 	timer_setup();
 
-	// New window offset by 1 column
 	arena = newwin(arena_height, arena_length, 0, 1);
+	// Telas extras usadas na impressao
+	WINDOW *preview = newwin(preview_height, preview_length, 0, arena_length + 2);
+	WINDOW *score   = newwin(score_height, score_length, preview_height, arena_length + 2);
+	WINDOW *info    = newwin(info_height, info_length, 0, arena_length + preview_length + 2);
 
-	printArena(15, 20, stdscr);
-	refresh();
+	// Arena e info so precisam ser impressos uma vez
+	printArena(arena_length, arena_height, stdscr);
+
 	int c;
 
+	// Seleciona as duas primeiras pecas
 	memcpy(old_piece, pieces[rand() % NUM_PIECES], sizeof(tPiece));
 	memcpy(new_piece, pieces[rand() % NUM_PIECES], sizeof(tPiece));
 
 	while(true) {
+		printInfo(info_height, info_length, info);
+		printPreview(preview);
+		printScores(score);
 		c = getch();
 		handleInput(c);
 	}
