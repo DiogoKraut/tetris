@@ -9,22 +9,25 @@ extern const tPiece pieces[NUM_PIECES];
 extern tPiece old_piece, new_piece;
 extern WINDOW *arena;
 extern int piece_color;
+extern int offi, pffj;
 
 void movePieceDown(void) {
 	int j;
 	for(j= 0; j < MAX_SHAPE; j++)
-		old_piece[0][j]++;
+		offi++;
 }
 
 int checkBottomCollision(void) {
-	int j;
-	for(j = 0; j < MAX_SHAPE; j++) {
-		if(old_piece[0][j] + 1 >= arena_height ||
-			 fixed_pieces[old_piece[0][j] + 1] [old_piece[1][j]] == '1') {
-				 affixPiece();
-				 return 0;
+	int i, j;
+	for(i = 0; i < DIMENTION; i++)
+		for(j = 0; j < DIMENTION; j++) {
+			if(old_piece[i][j] == 1)
+				if(i + offi + 1 > arena_height ||
+					 fixed_pieces[i + offi + 1][j] == '1') {
+					affixPiece();
+					return 0;
+			}
 		}
-	}
 	return 1;
 }
 
@@ -76,7 +79,6 @@ void affixPiece(void) {
 	for(j = 0; j < MAX_SHAPE; j++)
 		fixed_pieces[old_piece[0][j]] [old_piece[1][j]] = '1';
 }
-
 // void rotate(int dir) {
 // 	int j, pi, pj;
 //

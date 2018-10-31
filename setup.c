@@ -52,8 +52,8 @@ void signal_handler(int signum) {
 				piece_color = (rand() % 3) + 2;
 
 				/* old_piece = new_piece, new_piece = peca aleatoria da lista de pecas */
-				memcpy(old_piece, new_piece, sizeof(tPiece));
-				memcpy(new_piece, pieces[rand() % NUM_PIECES], sizeof(tPiece));
+				memcpy(&old_piece, &new_piece, sizeof(tPiece));
+				memcpy(&new_piece, &pieces[rand() % NUM_PIECES], sizeof(tPiece));
 			}
 			break;
 
