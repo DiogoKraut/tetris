@@ -97,11 +97,12 @@ void affixPiece(tPiece p) {
 				fixed_pieces[i + offi][j + offj] = '1'; // Fixa peca
 
 	/* Verifica se uma linha foi completada */
-	for(i = 0; i < DIMENTION; i++) // Para cada linha da peca
+	for(i = 0; i < DIMENTION; i++)  { // Para cada linha da peca
 		checkLine(i + offi);
+	}
 
-	SCORE->score += SCORE->combo_multiplier;
-	SCORE->combo_multiplier = 0.0;
+	SCORE->score += STD_SCORE * SCORE->combo_multiplier;
+	SCORE->combo_multiplier = COMBO_SCORE;
 }
 
 

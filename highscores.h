@@ -2,7 +2,7 @@
 
 #define SCORE_SIZE 13
 #define NAME_SIZE 3
-#define COMBO_SCORE 2000
+#define COMBO_SCORE 500
 #define AFFIX_SCORE 10
 #define STD_SCORE 5
 
