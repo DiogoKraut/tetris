@@ -8,7 +8,7 @@
 extern char fixed_pieces[arena_height][arena_length];
 extern const tPiece pieces[NUM_PIECES];
 extern tPiece old_piece, new_piece;
-extern WINDOW *arena;
+extern WINDOW *arena, *preview;
 extern int piece_color;
 extern int offi, offj;
 extern int SCORE, score_multiplier;
@@ -56,7 +56,7 @@ void movePiece(int dir) {
 					printPiece(old_piece, arena);
 				}
 				break;
-			case ' ':
+			case KEY_DOWN:
 				if(checkBottomCollision(old_piece)) {
 					offi++;
 					printPiece(old_piece, arena);
@@ -71,6 +71,7 @@ void movePiece(int dir) {
 					offi = 0;
 					offj = arena_length/2;
 
+					printPreview(preview);
 					printPiece(old_piece, arena);
 				}
 		}
@@ -94,7 +95,7 @@ void affixPiece(tPiece p) {
 
 
 
-void rotate(int dir) {
+void rotate(void) {
 	int i, j, newi, newj, pi, pj;
 
 	/* Pivos do centro da peca */
@@ -106,17 +107,14 @@ void rotate(int dir) {
 		for(j = 0; j < DIMENTION; j++)
 			aux[i][j] = 0;
 
-	switch(dir) {
-		case KEY_UP:
-			for(i = 0; i < DIMENTION; i++)
-				for(j = 0; j < DIMENTION; j++) {
-					newi = j + pi - pj;
-					newj = pi + pj - i;
+	for(i = 0; i < DIMENTION; i++)
+		for(j = 0; j < DIMENTION; j++) {
+			newi = j + pi - pj;
+			newj = pi + pj - i;
 
-					// old_piece[newi][newj] = old_piece[i][j];
-					aux[newi][newj] = old_piece[i][j];
-				}
-			memcpy(old_piece, aux, sizeof(tPiece));
-	}
+			// old_piece[newi][newj] = old_piece[i][j];
+			aux[newi][newj] = old_piece[i][j];
+		}
+	memcpy(old_piece, aux, sizeof(tPiece));
 	printPiece(old_piece, arena);
 }

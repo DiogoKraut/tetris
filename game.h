@@ -1,6 +1,5 @@
 #include <signal.h>
 
-
 #define INTERVAL 500000
 
 void handleInput(int c);

@@ -46,7 +46,7 @@ void signal_setup(void) {
 void signal_handler(int signum) {
 	switch(signum) {
 		case SIGALRM: // Move peca para baixo ou gera nova peca
-			movePiece(' '); // ' ' move a peca para baixo
+			movePiece(KEY_DOWN); // ' ' move a peca para baixo
 			break;
 
 		case SIGINT:
@@ -58,7 +58,7 @@ void signal_handler(int signum) {
 			printf("Game Over \n");
 			exit(1);
 			break;
-			
+
 	}
 }
 
@@ -66,13 +66,12 @@ void handleInput(int c) {
 	switch(c) {
 		case KEY_LEFT:
 		case KEY_RIGHT:
-		case ' ':
+		case KEY_DOWN:
 			movePiece(c);
 			break;
 
 		case KEY_UP:
-		case KEY_DOWN:
-			rotate(c);
+			rotate();
 			break;
 	}
 }

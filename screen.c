@@ -96,31 +96,44 @@ void printScores(WINDOW *win) {
 
 	mvwprintw(win, 0, 0, "CURRENT");
 	mvwprintw(win, 1, 1, "SCORE");
-	mvwprintw(win, 2, 0, "%i", SCORE);
-
 	wattroff(win, COLOR_PAIR(3));
+
+	wattron(win, A_BLINK);
+	mvwprintw(win, 2, 0, "%i", SCORE);
+	wattroff(win, A_BLINK);
+
 
 	wrefresh(win);
 }
 
-void printInfo(int i, int j, WINDOW *win) {
+void printInfo(WINDOW *win) {
 	wattron(win, COLOR_PAIR(3));
 
 	mvwprintw(win, 0, 5, " _____     _       _     ");
-	mvwprintw(win, 0, 5, "|_   _|___| |_ ___|_|___ ");
-	mvwprintw(win, 0, 5, "  | | | -_|  _|  _| |_ -|");
-	mvwprintw(win, 0, 5, "  |_| |___|_| |_| |_|___|");
-	mvwprintw(win, 0, 5, "                         ");
+	mvwprintw(win, 1, 5, "|_   _|___| |_ ___|_|___ ");
+	mvwprintw(win, 2, 5, "  | | | -_|  _|  _| |_ -|");
+	mvwprintw(win, 3, 5, "  |_| |___|_| |_| |_|___|");
+	mvwprintw(win, 4, 5, "                         ");
 
 	wattroff(win, COLOR_PAIR(3));
+
+	wattron(win, A_BOLD | A_UNDERLINE);
+	mvwprintw(win, 6,(info_length/2) - 10, "INSTRUCOES\n");
+	wattroff(win, A_BOLD | A_UNDERLINE);
+
+	wprintw(win, "KEY_LEFT  - Move peca para esquerda.\n");
+	wprintw(win, "KEY_RIGHT - Move peca para direita.\n");
+	wprintw(win, "KEY_DOWN  - Move peca para baixo.\n");
+	wprintw(win, "KEY_UP    - Rotaciona a peca.\n");
+
 
 	wrefresh(win);
 }
 
 
-                         
-//  _____     _       _     
-// |_   _|___| |_ ___|_|___ 
+
+//  _____     _       _
+// |_   _|___| |_ ___|_|___
 //   | | | -_|  _|  _| |_ -|
 //   |_| |___|_| |_| |_|___|
 //                          s

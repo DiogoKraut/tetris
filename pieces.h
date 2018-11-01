@@ -10,7 +10,7 @@
 
 typedef int tPiece[DIMENTION][DIMENTION];
 
-void rotate(int dir);
+void rotate(void);
 int checkBottomCollision(tPiece p);
 void movePieceDown(void);
 void affixPiece(tPiece p);

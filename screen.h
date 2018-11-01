@@ -17,7 +17,7 @@
 #define score_length preview_length
 #define score_height arena_height - preview_height
 
-#define info_length arena_length * 4
+#define info_length arena_length * 3
 #define info_height arena_height
 
 void printArena(int x, int y, WINDOW *win);
@@ -25,4 +25,4 @@ void printPiece(tPiece p, WINDOW *win);
 void printFixedPieces(void);
 void printPreview(WINDOW *win);
 void printScores(WINDOW *win);
-void printInfo(int i, int j, WINDOW *win);
+void printInfo(WINDOW *win);
