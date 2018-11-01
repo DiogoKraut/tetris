@@ -103,6 +103,8 @@ void removeLine(int line) {
 		fixed_pieces[line][j] = '0';
 
 	SCORE->combo_multiplier += COMBO_SCORE; // Aumenta a pontuacao
+
+	cascadeLines(line - 1);
 	wrefresh(arena);
 }
 
@@ -143,4 +145,12 @@ void endGame(void) {
 	exit(1);
 }
 
-void cascadeLines()
+void cascadeLines(int line) {
+	int i, j;
+
+	for(i = line; i > 0; i--)
+		for(j = 0; j < arena_length; j++) {
+			fixed_pieces[i+1][j] = fixed_pieces[i][j];
+			fixed_pieces[i][j]   = '0';
+		}
+}

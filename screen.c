@@ -130,6 +130,7 @@ void printInfo(WINDOW *win) {
 	wprintw(win, "KEY_DOWN  - Move peca para baixo.\n");
 	wprintw(win, "KEY_UP    - Rotaciona a peca.\n");
 	wprintw(win, "q         - Salva pontuacao e sai.\n");
+	wprintw(win, "^C        - Sai sem salvar.\n");
 
 
 	wrefresh(win);

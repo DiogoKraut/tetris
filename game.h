@@ -15,3 +15,4 @@ void checkLine(int line);
 void getScoreName(char *s);
 void endGame(void);
 void gameOver(void);
+void cascadeLines(int line);
