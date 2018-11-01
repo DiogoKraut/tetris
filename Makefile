@@ -21,4 +21,7 @@ $(TARGET): $(OBJECTS)
 
 clean:
 	-rm -f *.o core
+
+purge:
+	-rm -f *.o core
 	-rm -f $(TARGET)

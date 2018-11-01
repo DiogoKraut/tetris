@@ -2,10 +2,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <locale.h>
 
 #include <ncurses.h>
-#include <unistd.h>
 
 #include <sys/time.h>
 #include <time.h>
@@ -14,8 +12,8 @@
 #include "pieces.h"
 #include "screen.h"
 #include "game.h"
+#include "highscores.h"
 
-char fixed_pieces[arena_height][arena_length];
 const tPiece pieces[NUM_PIECES] = {
 	{{0, 1, 0},
 	 {0, 1, 0},
@@ -46,69 +44,93 @@ const tPiece pieces[NUM_PIECES] = {
 	 {0, 0, 0}} // Z
 };
 
-int SCORE = 0;
-int score_multiplier = 0;
+char fixed_pieces[arena_height][arena_length]; // Mapa das pecas ja fixas
 
-int offi, offj = arena_length/2;              // Offset da peca
-tPiece old_piece, new_piece; // Variaveis para pecas (atual e preview)
-WINDOW *arena, *preview, *info, *score;
-int piece_color;             // Cor da peca atual
+tPiece old_piece, new_piece;     // Variaveis para pecas (atual e preview)
+int offi, offj = arena_length/2; // Offset da peca
+int piece_color;                 // Cor da peca atual
+
+tScore *SCORE; // Pontuacao
+WINDOW *arena, *preview, *info, *score; // Telas para impressao
 
 int main(int argc, char const *argv[]) {
 	srand(time(NULL)); // Seed
-	int x, y;
 
 	/* Inicializacao NCurses */
 	initscr();             // inicializa a biblioteca ncurses
 	// raw();                 // ler teclas de controle (^C, ^Z, etc)
-	nodelay(stdscr, TRUE); // leitura não-bloqueante do teclado
 	keypad(stdscr, TRUE);  // ativa leitura de teclas de setas, Fn, etc
-	noecho();              // não escreve as teclas lidas na tela
 	curs_set(0);           // esconde o cursor do terminal
 	start_color();         // ativa modulo de cores
-	refresh();
-	/* Check window size */
+
+	/* Verifica tamanho do terminal */
+	int x, y;
 	getmaxyx(stdscr, y, x);
 	if(y < MIN_HEIGHT || x < MIN_LENGTH) {
 		fprintf(stderr, "Tela do terminal muito pequena!\n");
 		abort();
 	}
-	setlocale(LC_ALL, "");
-	init_color_pairs();
-	init_fixed_pieces();
+
+	/* Inicializa SCORE */
+	SCORE                   = malloc(sizeof(tScore));
+	SCORE->id               = malloc(NAME_SIZE * sizeof(char));
+	SCORE->score            = 0;
+	SCORE->combo_multiplier = 0;
+	getScoreName(SCORE->id); // Le iniciais do jogador
+
+	/* Mais opcoes do ncurses */
+	noecho();              // não escreve as teclas lidas na tela
+	nodelay(stdscr, TRUE); // leitura não-bloqueante do teclado
+
+	init_color_pairs();  // Define os pares de cores
+	init_fixed_pieces(); // Inicia o mapa com 0s
+
+	/* Telas extras usadas na impressao */
+	arena   = newwin(arena_height, arena_length, 0, 1);
+	preview = newwin(preview_height, preview_length, 0, arena_length + 2);
+	score   = newwin(score_height, score_length, preview_height, arena_length + 2);
+	info    = newwin(info_height, info_length, 0, arena_length + score_length + 5);
+
+
+	/* Seleciona as duas primeiras pecas */
+	memcpy(old_piece, pieces[rand() % NUM_PIECES], sizeof(tPiece));
+	memcpy(new_piece, pieces[rand() % NUM_PIECES], sizeof(tPiece));
+
+	/* Boarda, preview, highscores e info soh precisam ser impressos uma vez */
+	printArenaBoarder(arena_length, arena_height, stdscr);
+	printInfo(info);
+	printPreview(preview);
+
+	FILE *highscore = fopen("./highscores.txt", "r+");
+	printHighscores(highscore, score);
+	fclose(highscore);
+
 	/* Inicializacao dos sinais */
 	signal_setup();
 	/* Inicilizacao do timer */
 	timer_setup();
 
-	arena = newwin(arena_height, arena_length, 0, 1);
-	// Telas extras usadas na impressao
-	preview = newwin(preview_height, preview_length, 0, arena_length + 2);
-	score   = newwin(score_height, score_length, preview_height, arena_length + 2);
-	info    = newwin(info_height, info_length, 0, arena_length + preview_length + 10);
-
-	// Arena e info so precisam ser impressos uma vez
-	printArena(arena_length, arena_height, stdscr);
-
 	int c;
-
-	// Seleciona as duas primeiras pecas
-	memcpy(old_piece, pieces[rand() % NUM_PIECES], sizeof(tPiece));
-	memcpy(new_piece, pieces[rand() % NUM_PIECES], sizeof(tPiece));
-
-	printPreview(preview);
-	printInfo(info);
-	wrefresh(preview);
-	wrefresh(info);
-	wrefresh(score);
-
 	while(true) {
 		printScores(score);
+
 		c = getch();
-		handleInput(c);
+		switch(c) {
+			case KEY_LEFT:
+			case KEY_RIGHT:
+			case KEY_DOWN:
+				movePiece(c);
+				break;
+
+			case KEY_UP:
+				rotate();
+				break;
+
+			case 'q':
+				endGame();
+		}
 	}
 
-	delwin(arena);
-	endwin();
+	/* Nunca chega ate aqui */
 	return 0;
 }

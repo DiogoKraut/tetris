@@ -1,21 +1,23 @@
 /* DIOGO PARIS KRAUT - GRR20166365 */
 
-#include <stdlib.h>
-#include <string.h>
 #include <ncurses.h>
+#include <stdio.h>
+
+#include "pieces.h"
 #include "screen.h"
+#include "highscores.h"
 
 extern char fixed_pieces[arena_height][arena_length];
 extern tPiece old_piece, new_piece;
 extern WINDOW *arena;
 extern int piece_color;
 extern int offi, offj;
-extern int SCORE;
+extern tScore *SCORE;
 
-void printArena(int x, int y, WINDOW *win) {
+void printArenaBoarder(int x, int y, WINDOW *win) {
 	int i;
 
-	attron(COLOR_PAIR(5));
+	attron(COLOR_PAIR(MAGENTA));
 	/* Imprime lados */
 	for(i = 0; i < y; i++) {
 		mvwaddch(win, i, 0, ACS_VLINE);
@@ -30,7 +32,7 @@ void printArena(int x, int y, WINDOW *win) {
 	for(i = 1; i <= x; i++)
 		mvwaddch(win, y, i, ACS_HLINE);
 
-	attroff(COLOR_PAIR(5));
+	attroff(COLOR_PAIR(MAGENTA));
 	wrefresh(win);
 }
 
@@ -39,8 +41,8 @@ void printPiece(tPiece p, WINDOW *win) {
 		wclear(win);
 
 		for(i = 0; i < DIMENTION; i++)
-			for(j = 0; j < DIMENTION; j++)
-				if(old_piece[i][j] == 1)
+			for(j = 0; j < DIMENTION; j++) // Pecorre peca
+				if(old_piece[i][j] == 1)     // Se for bloco, imprime
 					mvwaddch(win, i + offi, j + offj, ACS_CKBOARD | COLOR_PAIR(piece_color));
 
 		printFixedPieces();
@@ -49,10 +51,11 @@ void printPiece(tPiece p, WINDOW *win) {
 
 void printFixedPieces(void) {
 	int i, j;
+
 	for(i = 0; i < arena_height; i++)
-		for(j = 0; j < arena_length; j++) {
+		for(j = 0; j < arena_length; j++) { // Percorre mapa de pecas fixas
 			if(fixed_pieces[i][j] == '1')
-				mvwaddch(arena, i, j, ACS_CKBOARD | COLOR_PAIR(1));
+				mvwaddch(arena, i, j, ACS_CKBOARD | COLOR_PAIR(RED)); // Imprime
 		}
 }
 
@@ -61,45 +64,45 @@ void printPreview(WINDOW *win) {
 
 	wclear(win);
 
-	wattron(win, COLOR_PAIR(3));
+	/* Imprime cabecario */
+	wattron(win, COLOR_PAIR(GREEN));
 	mvwprintw(win, 0, 0, "PREVIEW");
-	wattroff(win, COLOR_PAIR(3));
+	wattroff(win, COLOR_PAIR(GREEN));
 
 	/* Imprime caixa do preview */
-	wattron(win, COLOR_PAIR(5));
+	wattron(win, COLOR_PAIR(MAGENTA));
 
 	for(i = 2; i < preview_height - 1; i++) // Lado direito
-		mvwaddch(win, i, preview_length - 1, ACS_VLINE);
+		mvwaddch(win, i, 5, ACS_VLINE);
 
-	for(i = 0; i < preview_length - 1; i++) // Teto
+	for(i = 0; i < 5; i++) { // Teto e chao
 		mvwaddch(win, 1, i, ACS_HLINE);
-
-	for(i = 0; i < preview_length - 1; i++) // Chao
 		mvwaddch(win, preview_height -1, i, ACS_HLINE);
+	}
 
-	mvwaddch(win, 1, preview_length - 1, ACS_URCORNER);                  // Canto sup dir
-	mvwaddch(win, preview_height - 1, preview_length - 1, ACS_LRCORNER); // Canto inf dir
+	mvwaddch(win, 1, 5, ACS_URCORNER);                  // Canto sup dir
+	mvwaddch(win, preview_height - 1, 5, ACS_LRCORNER); // Canto inf dir
 
-	wattroff(win, COLOR_PAIR(5));
+	wattroff(win, COLOR_PAIR(MAGENTA));
 
 	/* Imprime peca do preview */
 	for(i = 0; i < DIMENTION; i++)
 		for(j = 0; j < DIMENTION; j++)
 			if(new_piece[i][j] == 1)
-				mvwaddch(win, i + 2, j, ACS_CKBOARD | COLOR_PAIR(piece_color));
+				mvwaddch(win, i + 2, j + 1, ACS_CKBOARD | COLOR_PAIR(piece_color));
 
 	wrefresh(win);
 }
 
 void printScores(WINDOW *win) {
-	wattron(win, COLOR_PAIR(3));
-
+	wattron(win, COLOR_PAIR(GREEN));
+	// Cabecario
 	mvwprintw(win, 0, 0, "CURRENT");
 	mvwprintw(win, 1, 1, "SCORE");
-	wattroff(win, COLOR_PAIR(3));
+	wattroff(win, COLOR_PAIR(GREEN));
 
 	wattron(win, A_BLINK);
-	mvwprintw(win, 2, 0, "%i", SCORE);
+	mvwprintw(win, 2, 0, "%i", SCORE->score); // Score
 	wattroff(win, A_BLINK);
 
 
@@ -107,7 +110,7 @@ void printScores(WINDOW *win) {
 }
 
 void printInfo(WINDOW *win) {
-	wattron(win, COLOR_PAIR(3));
+	wattron(win, COLOR_PAIR(GREEN));
 
 	mvwprintw(win, 0, 5, " _____     _       _     ");
 	mvwprintw(win, 1, 5, "|_   _|___| |_ ___|_|___ ");
@@ -115,25 +118,35 @@ void printInfo(WINDOW *win) {
 	mvwprintw(win, 3, 5, "  |_| |___|_| |_| |_|___|");
 	mvwprintw(win, 4, 5, "                         ");
 
-	wattroff(win, COLOR_PAIR(3));
+	wattroff(win, COLOR_PAIR(GREEN));
 
+	/* INSTRUCOES */
 	wattron(win, A_BOLD | A_UNDERLINE);
-	mvwprintw(win, 6,(info_length/2) - 10, "INSTRUCOES\n");
+	mvwprintw(win, 6, 12, "INSTRUCOES\n");
 	wattroff(win, A_BOLD | A_UNDERLINE);
 
 	wprintw(win, "KEY_LEFT  - Move peca para esquerda.\n");
 	wprintw(win, "KEY_RIGHT - Move peca para direita.\n");
 	wprintw(win, "KEY_DOWN  - Move peca para baixo.\n");
 	wprintw(win, "KEY_UP    - Rotaciona a peca.\n");
+	wprintw(win, "q         - Salva pontuacao e sai.\n");
 
 
 	wrefresh(win);
 }
 
+void printHighscores(FILE *hs, WINDOW *win) {
+	int i = 0;
+	char s[SCORE_SIZE];
 
+	// Cabecario
+	mvwprintw(win, 3, 0, "SCORES\n");
 
-//  _____     _       _
-// |_   _|___| |_ ___|_|___
-//   | | | -_|  _|  _| |_ -|
-//   |_| |___|_| |_| |_|___|
-//                          s
+	// High Scores
+	/* Enquanto nao tiver impresso 10 score ou fim do arquivo */
+	while(i < MAX_SCORES && getHighscore(hs, s)) {
+		mvwprintw(win, i + 4, 0, "%s\n", s);
+		i++;
+	}
+	wrefresh(win);
+}

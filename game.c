@@ -1,18 +1,19 @@
+/* DIOGO PARIS KRAUT - GRR20166365 */
+
+#include <stdlib.h>
 #include <string.h>
 #include <ncurses.h>
 #include <unistd.h>
 #include <sys/time.h>
 #include <signal.h>
-#include "pieces.h"
+
 #include "screen.h"
 #include "game.h"
+#include "highscores.h"
 
 extern char fixed_pieces[arena_height][arena_length];
-extern const tPiece pieces[NUM_PIECES];
-extern tPiece old_piece, new_piece;
-extern WINDOW *arena;
-extern int piece_color;
-extern int SCORE, score_multiplier;
+extern WINDOW *arena, *preview, *info, *score;
+extern tScore *SCORE;
 
 void timer_setup(void) {
 	/* Timer define a intensidade da "gravidade". Em intervalos fixos SIGALRM eh
@@ -33,7 +34,7 @@ void signal_setup(void) {
 	struct sigaction sa;
 
 	/* Inicializacao da estrutura sa */
-	sa.sa_handler = signal_handler;
+	sa.sa_handler = signal_handler; // Funcao para tratar sinais
 	sa.sa_flags   = 0;
 	sigemptyset(&sa.sa_mask);
 
@@ -45,53 +46,36 @@ void signal_setup(void) {
 
 void signal_handler(int signum) {
 	switch(signum) {
-		case SIGALRM: // Move peca para baixo ou gera nova peca
-			movePiece(KEY_DOWN); // ' ' move a peca para baixo
+		case SIGALRM: // Move peca para baixo
+			movePiece(KEY_DOWN);
 			break;
 
-		case SIGINT:
+		case SIGINT: // Parada forcada
 			endwin();
 			abort();
 
-		case SIGUSR1:
-			endwin();
-			printf("Game Over \n");
-			exit(1);
-			break;
-
-	}
-}
-
-void handleInput(int c) {
-	switch(c) {
-		case KEY_LEFT:
-		case KEY_RIGHT:
-		case KEY_DOWN:
-			movePiece(c);
-			break;
-
-		case KEY_UP:
-			rotate();
+		case SIGUSR1: // Fim de jogo
+			gameOver();
 			break;
 	}
 }
 
 void init_color_pairs(void) {
 	/* Inicia pares de cores */
-	init_pair(1, COLOR_RED, COLOR_BLACK);     // Cores das pecas ja fixas
+	init_pair(RED, COLOR_RED, COLOR_BLACK);     // Cores das pecas ja fixas
 
-	init_pair(2, COLOR_YELLOW, COLOR_BLACK);  /*    Possiveis cores      */
-	init_pair(3, COLOR_GREEN, COLOR_BLACK);	  /*       das pecas         */
-	init_pair(4, COLOR_BLUE, COLOR_BLACK);    /*       em queda          */
+	init_pair(YELLOW, COLOR_YELLOW, COLOR_BLACK);  /*    Possiveis cores      */
+	init_pair(GREEN, COLOR_GREEN, COLOR_BLACK);	   /*       das pecas         */
+	init_pair(BLUE, COLOR_BLUE, COLOR_BLACK);      /*       em queda          */
 
-	init_pair(5, COLOR_MAGENTA, COLOR_BLACK); // Cor das paredes da arena
+	init_pair(MAGENTA, COLOR_MAGENTA, COLOR_BLACK); // Cor das paredes da arena
 
-	init_pair(6, COLOR_BLACK, COLOR_BLACK);
+	init_pair(BLACK, COLOR_BLACK, COLOR_BLACK);
 }
 
 void init_fixed_pieces(void) {
 	int i,j;
-
+	/* Inicializa mapa de pecas fixas */
 	for(i = 0; i < arena_height; i++)
 		for(j = 0; j < arena_length; j++)
 			fixed_pieces[i][j] = '0';
@@ -114,9 +98,49 @@ void checkLine(int line) {
 
 void removeLine(int line) {
 	int j;
+	/* Apaga linha do mapa de pecas fixas */
 	for(j = 0; j < arena_length; j++)
 		fixed_pieces[line][j] = '0';
 
-	score_multiplier += 100;
+	SCORE->combo_multiplier += COMBO_SCORE; // Aumenta a pontuacao
 	wrefresh(arena);
 }
+
+void getScoreName(char *s) {
+	printw("Digite suas iniciais (3 caracteres): ");
+	refresh();
+	scanw("%3s", s);
+	clear();
+	refresh();
+}
+
+void gameOver(void) {
+	wclear(info);
+	nodelay(stdscr, FALSE);
+	wattron(info, A_BLINK | COLOR_PAIR(RED));
+
+	mvwprintw(info, 4, 0, "_____                  _____              ");
+	mvwprintw(info, 5, 0, "|   __|___ _____ ___   |     |_ _ ___ ___ ");
+	mvwprintw(info, 6, 0, "|  |  | .'|     | -_|  |  |  | | | -_|  _|");
+	mvwprintw(info, 7, 0, "|_____|__,|_|_|_|___|  |_____|\\_/|___|_|  ");
+
+	wrefresh(info);
+	wattroff(info, A_BLINK | COLOR_PAIR(RED));
+
+	sleep(5);
+	endGame();
+}
+
+void endGame(void) {
+	saveScore(SCORE);
+
+	free(SCORE->id);
+	free(SCORE);
+	delwin(score);
+	delwin(info);
+	delwin(arena);
+	endwin();
+	exit(1);
+}
+
+void cascadeLines()
